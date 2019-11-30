@@ -2,13 +2,14 @@ import amoCrm from './lib';
 
 const login: string = 'admin@zipofar.ru';
 const password: string = '415ecf366f230269925fe0dd8dd1b6a3687c5aaa';
+const subdomain: string = 'adminzipofarru';
 
 const start = async () => {
   try {
     const completeDate = Date.now() + (3600 * 24);
     const dateNow = new Date().toUTCString();
 
-    const libAmo = new amoCrm(login, password);
+    const libAmo = new amoCrm(login, password, subdomain);
     await libAmo.auth();
     const { userId } = libAmo;
 
@@ -34,9 +35,10 @@ const start = async () => {
         is_completed: false,
       },
     ];
-    const items = await libAmo.addTask(newTasks);
-    console.log(items)
-    //const tasks = libAmo.getTasks();
+    const resOfAdding = await libAmo.addTask(newTasks);
+    console.log(resOfAdding);
+    const selectedTasks = await libAmo.getTasks({ 'limit_rows': 2 });
+    console.log(selectedTasks);
   } catch (err) {
     console.log(err)
   }

@@ -13,20 +13,21 @@ interface Task {
 }
 
 class amoCrm {
+  fqdn: string;
   login: string;
   password: string;
-  url: string;
   userId: number;
   cookies: string = '';
 
-  constructor(login: string, password: string) {
+  constructor(login: string, password: string, subdomain: string) {
     this.login = login;
     this.password = password;
-    this.url = 'https://adminzipofarru.amocrm.ru/private/api/auth.php?type=json';
+    this.fqdn = `https://${subdomain}.amocrm.ru`;
   }
 
   async auth() {
-    const res = await axios.post(this.url, {
+    const url = `${this.fqdn}/private/api/auth.php?type=json`;
+    const res = await axios.post(url, {
       USER_LOGIN: this.login,
       USER_HASH: this.password,
     });
@@ -34,8 +35,19 @@ class amoCrm {
     this.userId = res.data.response.user.id;
   }
 
-  getTasks(id: string = '') {
-
+  async getTasks(filters: object) {
+    if (this.cookies === '') {
+      await this.auth();
+    }
+    const res = await axios({
+      method: 'GET',
+      url: `${this.fqdn}/api/v2/tasks`,
+      params: { ...filters },
+      headers: {
+        cookie: this.cookies,
+      } 
+    });
+    return res.data._embedded.items;
   }
 
   async addTask(tasks: Task[]) {
@@ -44,7 +56,7 @@ class amoCrm {
     }
     const res = await axios({
       method: 'POST',
-      url: 'https://adminzipofarru.amocrm.ru/api/v2/tasks',
+      url: `${this.fqdn}/api/v2/tasks`,
       data: {
         add: tasks
       },
