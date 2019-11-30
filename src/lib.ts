@@ -1,23 +1,23 @@
-import axios from 'axios';
-import { cookiesParse } from './utils';
+import axios from "axios";
+import { cookiesParse } from "./utils";
 
 interface Task {
-  element_id: number,
-  element_type: number,
-  task_type: number,
-  text: string,
-  complete_till_at: string,
-  responsible_user_id: number,
-  created_by: number,
-  is_completed: boolean,
+  element_id: number;
+  element_type: number;
+  task_type: number;
+  text: string;
+  complete_till_at: string;
+  responsible_user_id: number;
+  created_by: number;
+  is_completed: boolean;
 }
 
-class amoCrm {
+class AmoCrm {
   fqdn: string;
   login: string;
   password: string;
   userId: number;
-  cookies: string = '';
+  cookies = "";
 
   constructor(login: string, password: string, subdomain: string) {
     this.login = login;
@@ -31,16 +31,16 @@ class amoCrm {
       USER_LOGIN: this.login,
       USER_HASH: this.password,
     });
-    this.cookies = cookiesParse(res.headers['set-cookie']).join('; ');
+    this.cookies = cookiesParse(res.headers["set-cookie"]).join("; ");
     this.userId = res.data.response.user.id;
   }
 
   async getTasks(filters: object) {
-    if (this.cookies === '') {
+    if (this.cookies === "") {
       await this.auth();
     }
     const res = await axios({
-      method: 'GET',
+      method: "GET",
       url: `${this.fqdn}/api/v2/tasks`,
       params: { ...filters },
       headers: {
@@ -51,11 +51,11 @@ class amoCrm {
   }
 
   async addTask(tasks: Task[]) {
-    if (this.cookies === '') {
+    if (this.cookies === "") {
       await this.auth();
     }
     const res = await axios({
-      method: 'POST',
+      method: "POST",
       url: `${this.fqdn}/api/v2/tasks`,
       data: {
         add: tasks
@@ -68,4 +68,4 @@ class amoCrm {
   }
 }
 
-export default amoCrm;
+export default AmoCrm;

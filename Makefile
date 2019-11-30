@@ -1,5 +1,8 @@
 dev:
-	tsc -w
+	npx tsc -w
 
 build:
-	rm -rf ./dist && tsc
+	rm -rf ./dist && npx tsc
+
+lint:
+	npx eslint ./src/*.ts
