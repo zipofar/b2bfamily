@@ -1,4 +1,5 @@
-
+import axios from 'axios';
+import { cookiesParse } from './utils';
 
 interface Task {
   element_id: number,
@@ -14,24 +15,44 @@ interface Task {
 class amoCrm {
   login: string;
   password: string;
-  address: string;
+  url: string;
+  userId: number;
+  cookies: string = '';
 
   constructor(login: string, password: string) {
     this.login = login;
     this.password = password;
-    this.address = 'https://adminzipofarru.amocrm.ru/private/api/auth.php?type=json';
+    this.url = 'https://adminzipofarru.amocrm.ru/private/api/auth.php?type=json';
   }
 
-  auth() {
-
+  async auth() {
+    const res = await axios.post(this.url, {
+      USER_LOGIN: this.login,
+      USER_HASH: this.password,
+    });
+    this.cookies = cookiesParse(res.headers['set-cookie']).join('; ');
+    this.userId = res.data.response.user.id;
   }
 
   getTasks(id: string = '') {
 
   }
 
-  addTask(task: Task) {
-
+  async addTask(tasks: Task[]) {
+    if (this.cookies === '') {
+      await this.auth();
+    }
+    const res = await axios({
+      method: 'POST',
+      url: 'https://adminzipofarru.amocrm.ru/api/v2/tasks',
+      data: {
+        add: tasks
+      },
+      headers: {
+        cookie: this.cookies,
+      } 
+    });
+    return res.data._embedded.items;
   }
 }
 
